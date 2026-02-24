@@ -4,15 +4,21 @@ import { createClient } from "@supabase/supabase-js";
 export async function POST(req: Request) {
     try {
         // Initialize Supabase inside the handler so env vars are read at runtime
-        const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
-        const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
+        // Remove any explicit quotes and trim whitespace which can cause fetch to fail on Vercel
+        const supabaseUrl = (process.env.NEXT_PUBLIC_SUPABASE_URL || "").replace(/['"]/g, '').trim();
+        const supabaseServiceKey = (process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "").replace(/['"]/g, '').trim();
 
         if (!supabaseUrl || !supabaseServiceKey) {
             console.error("Supabase credentials missing");
             return NextResponse.json({ success: false, error: "Database configuration error on server." }, { status: 500 });
         }
 
-        const supabase = createClient(supabaseUrl, supabaseServiceKey);
+        const supabase = createClient(supabaseUrl, supabaseServiceKey, {
+            auth: {
+                persistSession: false,
+                autoRefreshToken: false
+            }
+        });
 
         const body = await req.json();
         const { name, company, designation, email, website } = body;
@@ -35,6 +41,7 @@ export async function POST(req: Request) {
         });
 
         // 1. Insert into Supabase
+        console.log("Attempting to insert into Supabase at URL:", supabaseUrl);
         const { error: dbError } = await supabase
             .from('waitlist')
             .insert([
@@ -42,7 +49,9 @@ export async function POST(req: Request) {
             ]);
 
         if (dbError) {
-            console.error("Supabase Insertion Error:", dbError);
+            console.error("Supabase Insertion Error Full Object:", JSON.stringify(dbError, null, 2));
+            console.error("Supabase Insertion Error details:", dbError);
+
             // We can choose to fail the request here, or continue to send the email anyway.
             // Usually, failing is safer so the user knows it didn't work and can retry.
             if (dbError.code === '23505') { // Unique violation
