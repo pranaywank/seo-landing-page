@@ -23,12 +23,6 @@ export async function POST(req: Request) {
         const body = await req.json();
         const { name, company, designation, email, website } = body;
 
-        if (!name || !company || !designation || !email || !website) {
-            return NextResponse.json(
-                { success: false, error: "All fields are required." },
-                { status: 400 }
-            );
-        }
 
         // Log for Vercel outputs
         console.log("New Waitlist Signup:", {
