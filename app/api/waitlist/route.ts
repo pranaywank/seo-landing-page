@@ -55,17 +55,25 @@ export async function POST(req: Request) {
                 );
             }
             return NextResponse.json(
-                { success: false, error: dbError.message || "Database error. Please try again." },
+                { success: false, error: `${dbError.message || "Database error"} (URL: ${supabaseUrl})` },
                 { status: 500 }
             );
         }
 
 
         return NextResponse.json({ success: true });
-    } catch (error) {
+    } catch (error: any) {
         console.error("Waitlist API Error:", error);
+
+        let errorMessage = "Internal server error.";
+        if (error instanceof Error) {
+            errorMessage = error.message;
+        } else if (typeof error === 'string') {
+            errorMessage = error;
+        }
+
         return NextResponse.json(
-            { success: false, error: "Internal server error." },
+            { success: false, error: `Exception: ${errorMessage}` },
             { status: 500 }
         );
     }
