@@ -1,13 +1,19 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
-// Initialize Supabase (Service Role key required to bypass RLS)
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
-const supabase = createClient(supabaseUrl, supabaseServiceKey);
-
 export async function POST(req: Request) {
     try {
+        // Initialize Supabase inside the handler so env vars are read at runtime
+        const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
+        const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
+
+        if (!supabaseUrl || !supabaseServiceKey) {
+            console.error("Supabase credentials missing");
+            return NextResponse.json({ success: false, error: "Database configuration error on server." }, { status: 500 });
+        }
+
+        const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
         const body = await req.json();
         const { name, company, designation, email, website } = body;
 
@@ -46,7 +52,7 @@ export async function POST(req: Request) {
                 );
             }
             return NextResponse.json(
-                { success: false, error: "Database error. Please try again." },
+                { success: false, error: dbError.message || "Database error. Please try again." },
                 { status: 500 }
             );
         }
