@@ -1,21 +1,23 @@
 import type { Metadata } from "next";
-import { Figtree } from "next/font/google";
+import { Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 
-const figtree = Figtree({
+const jakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
-  variable: "--font-figtree",
+  variable: "--font-jakarta",
   display: "swap",
 });
 
 export const metadata: Metadata = {
-  title: "SEO Automation Tool | Wednesday Solution",
-  description: "One Slack command. 30 SEO-optimized blogs published automatically. Keyword research, content writing, images, internal links, and CMS publishing \u2014 fully automated.",
+  title: "SEO Automation Tool | Wednesday Solutions",
+  description:
+    "Your entire SEO pipeline, automated. From keyword research to published blog post. Built for founders and small marketing teams.",
   openGraph: {
-    title: "SEO Automation Tool | Wednesday Solution",
-    description: "We replaced our SEO agency with one Slack command. Now you can too.",
+    title: "SEO Automation Tool | Wednesday Solutions",
+    description:
+      "Your entire SEO pipeline, automated. From keyword research to published blog post.",
     type: "website",
-  }
+  },
 };
 
 export default function RootLayout({
@@ -24,8 +26,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={figtree.variable}>
-      <body className="antialiased font-sans">
+    <html lang="en" className={jakarta.variable}>
+      <body className="bg-dark text-white font-sans antialiased">
         {children}
       </body>
     </html>
